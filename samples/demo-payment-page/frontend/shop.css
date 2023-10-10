@@ -1,0 +1,90 @@
+:root {
+  --primary-color: #c72727;
+  --primary-hover-color: #9f1f1f;
+  --secondary-color: #f99500;
+  --secondary-hover-color: #d76b00;
+  --light-color: #f3f3f3;
+  --dark-color: #333;
+  --max-width: 1100px;
+}
+#corvuspay-card-element {
+  padding: 12px 20px;
+  margin: 8px 0;
+  display: inline-block;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  min-width: 300px;
+}
+.item-button {
+  margin: 0 1.5rem;
+  padding: 0.5rem 1.5rem;
+  font-weight: bold;
+  text-align: center;
+  background-color: var(--secondary-color);
+  color: var(--light-color);
+  border: none;
+  cursor: pointer;
+}
+.item-button:hover {
+  background: var(--secondary-hover-color);
+}
+.item-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.item-button-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#corvuspay-payment-form {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+#card-error,
+#corvuspay-error {
+  color: #fa755a;
+  text-align: left;
+  font-size: 13px;
+  line-height: 17px;
+  max-width: 300px;
+  /* margin-top: 12px; */
+}
+
+.spinner-auto {
+  position: absolute; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  text-align: center;
+}
+.spinner-auto svg {
+  height: 1rem;
+  width: 1rem;
+  fill: var(--color-primary);
+  animation: rotate 2s infinite linear;
+}
+
+/* .shop-item .spinner-auto {
+  padding-left: 100px;
+} */
+
+.spinner {
+  margin: 5rem auto;
+  text-align: center;
+}
+.spinner svg {
+  height: 6rem;
+  width: 6rem;
+  fill: var(--color-primary);
+  animation: rotate 2s infinite linear;
+}
+@keyframes rotate {
+  0% {
+    transform: rotate(0);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

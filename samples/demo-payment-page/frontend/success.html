@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Payment Success</title>
+    <link rel="stylesheet" href="shop.css" />
+  </head>
+  <body>
+    <h1>Message: <span id="displayMessage"></span></h1>
+    <p>Payment Status: <span id="status"></span></p>
+    <p>Approval code: <span id="approvalCode"></span></p>
+
+    <button onclick="goBack()">Go Back</button>
+
+    <script>
+      const urlParams = new URLSearchParams(window.location.search);
+      document.getElementById("status").innerText = urlParams.get("status");
+      document.getElementById("approvalCode").innerText =
+        urlParams.get("approvalCode");
+      document.getElementById("displayMessage").innerText =
+        urlParams.get("displayMessage");
+
+      function goBack() {
+        window.location.href = "/";
+      }
+    </script>
+  </body>
+</html>

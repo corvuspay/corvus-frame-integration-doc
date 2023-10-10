@@ -1,0 +1,19 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "Backend server for frontend app",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "CorvusPay",
+    "CorvusFrame"
+  ],
+  "author": "robert.kuhar@corvuspay.com",
+  "license": "ISC",
+  "devDependencies": {
+    "crypto-js": "^4.1.1",
+    "express": "^4.18.2"
+  }
+}
