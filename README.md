@@ -28,6 +28,8 @@
 
 This README provides documentation for integrating CorvusFrame, a payment service, into webshop applications.
 
+![CorvusFrame Preview](files/CorvusFrame.png)
+
 ---
 
 ## Prerequisites
