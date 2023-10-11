@@ -35,7 +35,7 @@ This README provides documentation for integrating CorvusFrame, a payment servic
 ## Prerequisites
 
 - Obtain your Store Secret Key from CorvusPay Merchant Portal. This key is used for signing the API requests in the shop backend application.
-- Obtain your CorvusPay Store Public Key. It will be used to initialize CorvusFrame.I can be also found in CorvusPay Merchant Portal.
+- Acquire the CorvusPay Store Public Key for initializing CorvusFrame. The public key is available upon request from CorvusPay support.
 - Include the CorvusPay JS Bundle from its external source in your application. This bundle is essential for enabling the payment features.
 
 ---
@@ -82,7 +82,7 @@ To initialize CorvusFrame in your application, you'll need to call the `CorvusPa
 
 ##### Required Parameters
 
-`requiredParameters` is an object that should contain the public key obtained from the CorvusPay Merchant Portal. This key is essential for API communication and should be kept secure.
+`requiredParameters` is an object that should include the CorvusPay Store Public Key acquired from CorvusPay support. This key is essential for API communication and should be kept secure.
 
 ```javascript
 const requiredParameters = {
@@ -292,9 +292,9 @@ Initialize payment by sending a POST request to the following endpoint:
 | `currency`            | String    | Yes      | "EUR"        | Currency in ISO 4217 format                                                 |
 | `amount`              | String    | Yes      | "123.54"     | Amount to be charged in currency unit                                       |
 | `cart`                | String    | Yes      | "2x Item"    | Shopping-cart contents description                                          |
-| `require_complete`    | Boolean   | No       | `true`       | If `true`, payment will be finished only when order completion is confirmed |
+| `require_complete`    | Boolean   | Yes       | `true`       | If `true`, payment will be finished only when order completion is confirmed |
 | `signature`           | String    | Yes      | _Calculated_ | HMAC-SHA256 signature. See [Calculate Signature](#calculate-signature)      |
-| `save_card`           | Boolean   | No       | `true`       | Indicates if the payment is to save card                                    |
+| `save_card`           | Boolean   | No       | `false`       | Indicates if the payment is to save card                                    |
 | `cardholder_name`     | String    | No       | "John"       | Name of the cardholder                                                      |
 | `cardholder_surname`  | String    | No       | "Doe"        | Surname of the cardholder                                                   |
 | `cardholder_address`  | String    | No       | "123 St"     | Address of the cardholder                                                   |
