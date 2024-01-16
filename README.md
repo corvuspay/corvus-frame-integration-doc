@@ -171,6 +171,12 @@ card.on("error", (errorMsg) => showErrorMessage(errorMsg));
 - `card-ready`: Triggered when the card data is valid.
 - `show-error`: Triggered when a validation error occurs.
 - `error`: Triggered when any error occurs within the CorvusFrame form.
+- `show-modal`: Triggered when the CorvusFrame form changes size. This occurs when 3D secure authentication is required.
+- `hide-modal`: Triggered when the CorvusFrame form reverts to its original size. This occurs after 3D secure authentication is finished.
+
+`show-modal` and `hide-modal` contains the following properties:
+- `heightToBeSet`: The height of the CorvusFrame form.
+- `widthToBeSet`: The width of the CorvusFrame form.
 
 These events help you manage different stages and errors during the payment process.
 
