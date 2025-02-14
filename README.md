@@ -163,6 +163,11 @@ card.on("show-error", (errorMsg) =>
   showErrorMessage(`Validation error: ${errorMsg}`)
 );
 
+// This event is fired when a previously reported validation error is no longer present in the CorvusFrame form
+card.on("clear-error", (errorMsg) => {
+  clearErrorMessage(errorMsg);
+});
+  
 // This event is fired when an error occurs within the CorvusFrame form
 card.on("error", (errorMsg) => showErrorMessage(errorMsg));
 ```
@@ -170,6 +175,7 @@ card.on("error", (errorMsg) => showErrorMessage(errorMsg));
 - `ready`: Triggered when the CorvusFrame form is loaded and ready.
 - `card-ready`: Triggered when the card data is valid.
 - `show-error`: Triggered when a validation error occurs.
+- `clear-error`: Triggered when a validation error is no longer present.
 - `error`: Triggered when any error occurs within the CorvusFrame form.
 - `show-modal`: Triggered when the CorvusFrame form changes size. This occurs when 3D secure authentication is required.
 - `hide-modal`: Triggered when the CorvusFrame form reverts to its original size. This occurs after 3D secure authentication is finished.
