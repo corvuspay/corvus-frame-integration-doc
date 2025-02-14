@@ -42,6 +42,10 @@ document.addEventListener("DOMContentLoaded", (event) => {
   card.on("show-error", (errorMsg) =>
     showErrorMessage(`Validation error: ${errorMsg}`)
   );
+  // This event is fired when a previously reported validation error is no longer present in the CorvusFrame form
+  card.on("clear-error", (errorMsg) => {
+    clearErrorMessage(errorMsg);
+  });
   // This event is fired when an error occurs within the CorvusFrame form
   card.on("error", (errorMsg) => showErrorMessage(errorMsg));
 
@@ -119,6 +123,10 @@ const initPaymentOnBackend = (e, card) => {
 
 const showErrorMessage = (errorMsg) => {
   document.getElementById("corvuspay-error").innerHTML = errorMsg;
+};
+
+const clearErrorMessage = (errorMsg) => {
+  document.getElementById("corvuspay-error").innerHTML = "";
 };
 
 const changeCardReadiness = (cardReady) => {
