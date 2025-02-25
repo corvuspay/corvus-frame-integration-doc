@@ -177,12 +177,16 @@ card.on("error", (errorMsg) => showErrorMessage(errorMsg));
 - `show-error`: Triggered when a validation error occurs.
 - `clear-error`: Triggered when a validation error is no longer present.
 - `error`: Triggered when any error occurs within the CorvusFrame form.
-- `show-modal`: Triggered when the CorvusFrame form changes size. This occurs when 3D secure authentication is required.
-- `hide-modal`: Triggered when the CorvusFrame form reverts to its original size. This occurs after 3D secure authentication is finished.
-
-`show-modal` and `hide-modal` contains the following properties:
-- `heightToBeSet`: The height of the CorvusFrame form.
-- `widthToBeSet`: The width of the CorvusFrame form.
+- `show-modal`: Triggered when the CorvusFrame form changes size. This occurs when 3D secure authentication is required. This event includes the following properties:
+  - `heightToBeSet`: The new height of the CorvusFrame form.
+  - `widthToBeSet`: The new width of the CorvusFrame form.
+- `hide-modal`: Triggered when the CorvusFrame form reverts to its original size. This occurs after 3D secure authentication is finished. This event includes the following properties:
+  - `heightToBeSet`: The restored height of the CorvusFrame form.
+  - `widthToBeSet`: The restored width of the CorvusFrame form.
+- `installments-calculated`: Triggered when installments are calculated for the entered PAN. This event includes the following properties:
+  - `minInstallments`: The minimum number of installments possible for the provided card.
+  - `maxInstallments`: The maximum number of installments possible for the provided card.
+  - `minAmount`: The minimum amount required for these installments, in cents.
 
 These events help you manage different stages and errors during the payment process.
 
@@ -314,7 +318,7 @@ Initialize payment by sending a POST request to the following endpoint:
 | `cardholder_zip_code` | String    | No       | "10000"      | ZIP code of the cardholder                                                  |
 | `cardholder_country`  | String    | No       | "Croatia"    | Country of the cardholder                                                   |
 | `cardholder_email`    | String    | Yes      | "a@a.com"    | Email address of the cardholder                                             |
-| `number_of_installments` | Number  | No       | 12            | Number of installments.                                                     |
+| `number_of_installments` | Number  | No       | 12            | The number of installments selected for the payment. Set this field only if the `installments-calculated` event returns a `minInstallments` value greater than 1, indicating that installment payments are available. The value should fall between the returned `minInstallments` and `maxInstallments`. |
 
 ##### Response Body
 
