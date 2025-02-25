@@ -314,6 +314,7 @@ Initialize payment by sending a POST request to the following endpoint:
 | `cardholder_zip_code` | String    | No       | "10000"      | ZIP code of the cardholder                                                  |
 | `cardholder_country`  | String    | No       | "Croatia"    | Country of the cardholder                                                   |
 | `cardholder_email`    | String    | Yes      | "a@a.com"    | Email address of the cardholder                                             |
+| `number_of_installments` | Number  | No       | 12            | Number of installments.                                                     |
 
 ##### Response Body
 
