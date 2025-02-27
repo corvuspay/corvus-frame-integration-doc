@@ -318,7 +318,7 @@ Initialize payment by sending a POST request to the following endpoint:
 | `cardholder_zip_code` | String    | No       | "10000"      | ZIP code of the cardholder                                                  |
 | `cardholder_country`  | String    | No       | "Croatia"    | Country of the cardholder                                                   |
 | `cardholder_email`    | String    | Yes      | "a@a.com"    | Email address of the cardholder                                             |
-| `number_of_installments` | Number  | No       | 12            | The number of installments selected for the payment. Set this field only if the `installments-calculated` event returns a `minInstallments` value greater than 1, indicating that installment payments are available. The value should fall between the returned `minInstallments` and `maxInstallments`. |
+| `number_of_installments` | String  | No       | 06            | The number of installments selected for the payment. Set this field only if the `installments-calculated` event returns a `minInstallments` value greater than 1, indicating that installment payments are available. The value should fall between the returned `minInstallments` and `maxInstallments`. |
 
 ##### Response Body
 
