@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Payment Error</title>
+    <link rel="stylesheet" href="card-storage.css" />
+  </head>
+  <body>
+    <h1>Error Code: <span id="errorCode"></span></h1>
+    <p>Message: <span id="displayMessage"></span></p>
+
+    <button onclick="goBack()">Go Back</button>
+
+    <script>
+      const urlParams = new URLSearchParams(window.location.search);
+      document.getElementById("errorCode").innerText =
+        urlParams.get("errorCode");
+      document.getElementById("displayMessage").innerText =
+        urlParams.get("displayMessage");
+
+      function goBack() {
+        window.location.href = "/";
+      }
+    </script>
+  </body>
+</html>
