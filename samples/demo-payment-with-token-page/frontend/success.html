@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Payment Success</title>
+    <link rel="stylesheet" href="card-storage.css" />
+  </head>
+  <body>
+    <script src="http://127.0.0.1:40590/cjs.bundle.js"></script>
+    <script src="using-card-from-card-storage.js"></script>
+  
+    <h1>Message: <span id="displayMessage"></span></h1>
+    <p>Payment Status: <span id="status"></span></p>
+    <p>Approval code: <span id="approvalCode"></span></p>
+
+    <br/>
+    <p>Token value: <span id="tokenValue"></span></p>
+    <p>User card profile id: <span id="userCardProfileId"></span></p>
+    <br/>
+    <div id="corvuspay-payment-with-token-form">
+      <div id="corvuspay-with-token-card-element"></div>
+      <p id="corvuspay-with-token-error" role="alert"></p>
+      <div class="item-button-wrapper">
+        <input
+                class="item-button"
+                type="submit"
+                value="Pay with token"
+                disabled="true"
+        />
+      </div>
+    </div>
+
+    <br/>
+
+    <button onclick="goBack()">Go Back</button>
+  </body>
+</html>

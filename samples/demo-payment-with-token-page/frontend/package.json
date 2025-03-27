@@ -1,0 +1,20 @@
+{
+  "name": "demo-payment-page",
+  "version": "1.0.0",
+  "description": "Simple web application that demonstrates integration with CorvusFrame",
+  "main": "card-storage.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "live-server --host=0.0.0.0 --port=50589 --mount=/:src --proxy=/corvuspay-init-payment:http://localhost:4243/corvuspay-init-payment --proxy=/corvuspay-check-payment-response:http://localhost:4243/corvuspay-check-payment-response --proxy=/corvuspay-fetch-session-token:http://localhost:4243/corvuspay-fetch-session-token --proxy=/corvuspay-init-payment-with-token:http://localhost:4243/corvuspay-init-payment-with-token"
+  },
+  "keywords": [
+    "CorvusPay",
+    "CorvusFrame",
+    "CorvusFrame with CardStorage"
+  ],
+  "author": "simona.stojanovska@corvuspay.com",
+  "license": "ISC",
+  "devDependencies": {
+    "live-server": "^1.2.2"
+  }
+}
