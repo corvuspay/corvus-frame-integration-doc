@@ -24,6 +24,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
   const option = {
     showCvv: true, // Set to true if you want to show cvv field
     hideCorvusPayLogo: false, // Set to true if you want to hide the logo
+    locale: "hr", //Language used for translating the error messages and labels
   };
 
   /**
@@ -31,11 +32,13 @@ document.addEventListener("DOMContentLoaded", (event) => {
    * backgroundColor: Background color of the form
    * fontFamily: Font family of the form
    * fontSize: Font size of the form
+   * fontColor: Font color of the form
    */
   const style = {
     // backgroundColor: "#ffffff", // Background color of the form
     // fontFamily: "Arial", // Font family of the form
     // fontSize: 13, // Font size of the form
+    // fontColor: "#000000", // Font color of the form
   };
 
   const card = corvuspay.card(option, style, "corvuspay-card-element");
