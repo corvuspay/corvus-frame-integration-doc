@@ -125,11 +125,13 @@ const card = corvuspay.card(option, style, "corvuspay-card-element");
   |-------------------|--------------|-----------------------------------------------|
   | `showCvv` | Boolean | Set to `true` if you want to show the CVV field.|
   | `hideCorvusPayLogo` | Boolean | Set to `true` if you want to hide the CorvusPay logo.|
+  | `locale` | String | Set to hr if you want the labels and error messages displayed in Croatian. Set to en for labels and error messages in English. Default locale is determined by the browser's settings|
 
 ```javascript
 const option = {
   showCvv: true, // Set to true if you want to show the CVV field
   hideCorvusPayLogo: false, // Set to true if you want to hide the CorvusPay logo
+  locale: "hr", // Specifies the language used for translating error messages and labels. Currently, only English (en) and Croatian (hr) are supported. If another language is provided or the value is missing, the language will be determined by the browser's settings.
 };
 ```
 
@@ -141,12 +143,14 @@ const option = {
   | `backgroundColor`| String | Background color of the form. | Hexadecimal, e.g., "#ffffff" |
   | `fontFamily` | String | Font family of the form. | - |
   | `fontSize` | Numeric | Font size of the form, should be provided as a numeric. | Numeric |
+  | `fontColor`| String | Font color of the form. | Hexadecimal, e.g., "#000000" |
 
 ```javascript
 const style = {
   backgroundColor: "#ffffff", // Background color of the form
   fontFamily: "Arial", // Font family of the form
   fontSize: 13, // Font size of the form
+  fontColor: "#000000", // Font color of the form
 };
 ```
 
