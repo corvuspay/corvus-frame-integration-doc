@@ -56,6 +56,12 @@ app.post("/corvuspay-init-payment", async (req, res) => {
             cardholder_zip_code: customer.cardholderZipCode,
             cardholder_country: customer.cardholderCountry,
             cardholder_email: customer.cardholderEmail,
+            ...(purchase.original_amount != null && {
+                original_amount: purchase.original_amount
+            }), //the original amount before discount is applied  
+            ...(purchase.discounted_amount_used != null && {
+                discounted_amount_used: purchase.discounted_amount_used
+            }) //send discounted_amount_used: true if discount is applied
         };
 
         const signature = calculateSignature(
@@ -268,6 +274,12 @@ app.post("/corvuspay-init-payment-with-token", async (req, res) => {
             amount: purchase.amount, // amount in currency unit, not cents
             cart: purchase.cart, // cart description
             require_complete: true, // if true, payment will be finished only when order completion is confirmed. Order can be completed in CorvusPay Merchant Portal or by calling /complete endpoint
+            ...(purchase.original_amount != null && {
+                original_amount: purchase.original_amount
+            }), //the original amount before discount is applied
+            ...(purchase.discounted_amount_used != null && {
+                discounted_amount_used: purchase.discounted_amount_used
+            }) //send discounted_amount_used: true if discount is applied
         }
 
         const signature = calculateSignature(

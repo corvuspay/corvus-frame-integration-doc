@@ -16,17 +16,49 @@
     <p>Token value: <span id="tokenValue"></span></p>
     <p>User card profile id: <span id="userCardProfileId"></span></p>
     <br/>
-    <div id="corvuspay-payment-with-token-form">
-      <div id="corvuspay-with-token-card-element"></div>
-      <p id="corvuspay-with-token-error" role="alert"></p>
-      <div class="item-button-wrapper">
-        <input
-                class="item-button"
-                type="submit"
-                value="Pay with token"
-                disabled="true"
-        />
-      </div>
+    
+    <div id="corvuspay-payment-with-token-container">
+        <div id="corvuspay-payment-with-token-form">
+            <div id="corvuspay-with-token-card-element"></div>
+            <p id="corvuspay-with-token-error" role="alert"></p>
+            <div class="item-button-wrapper">
+                <input
+                        class="item-button"
+                        type="submit"
+                        value="Pay with token"
+                        disabled="true"
+                />
+            </div>
+        </div>
+
+        <div id="card-information">
+            <div>
+                <h4>Card Information</h4>
+
+                <div class="row">
+                    <div class="label">Card brand</div>
+                    <div id="cardBrand" class="value">—</div>
+                </div>
+
+                <div class="row">
+                    <div class="label">Discount supported</div>
+                    <span id="discountSupported" class="value">—</span>
+                </div>
+
+                <div class="row">
+                    <div class="label">Amount with discount</div>
+                    <div id="amountWithDiscount" class="value">—</div>
+                </div>
+
+                <div class="row">
+                    <div class="label">Number of Installments:</div>
+                    <select id="numberOfInstallments" disabled class="value">
+
+                    </select>
+                </div>
+
+            </div>
+        </div>
     </div>
 
     <br/>
