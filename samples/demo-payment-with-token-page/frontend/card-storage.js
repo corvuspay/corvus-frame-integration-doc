@@ -1,6 +1,11 @@
 "use strict";
 const CORVUSPAY_STORE_PUBLIC_KEY = [STORE_PUBLIC_KEY];
 
+/**
+ * will be true if entered BIN is eligible for discounted amount.
+ */
+let canDiscountedAmountBeUsedByTheShop = false;
+
 document.addEventListener("DOMContentLoaded", (event) => {
   localStorage.removeItem("token")
   localStorage.removeItem("userCardProfileId")
@@ -59,6 +64,21 @@ document.addEventListener("DOMContentLoaded", (event) => {
   // This event is fired when an error occurs within the CorvusFrame form
   card.on("error", (errorMsg) => showErrorMessage(errorMsg));
 
+  //This event is fired when installments are calculated for the card.
+  card.on("installments-calculated", (cardInstallmentsRangeConfig) =>
+    doOnInstallmentsCalculated(cardInstallmentsRangeConfig)
+  );
+
+  //This event is fired when discounted amount can be used for the card.
+  card.on("can-discounted-amount-be-used", (canDiscountedAmountBeUsed) =>
+    doOnCanDiscountedAmountBeUsed(canDiscountedAmountBeUsed)
+  );
+
+  // This event is fired when the card brand is determined.
+  card.on("card-info", (cardInfo) =>
+    doOnCardInfo(cardInfo)
+  );
+
   // when user clicks on submit button, we are calling initPaymentOnBackend function
   // from card object
   document
@@ -87,10 +107,21 @@ const initCardStoragePaymentOnBackend = (e, card) => {
    *
    */
   const purchase = {
-    amount: 1.23, // amount in currency unit, not cents
+    amount: 12.23, // amount in currency unit, not cents
     currency: "EUR", // currency in ISO 4217 format
     cart: "Product 1", // cart description
   };
+
+  /**
+   * If discounts are available for the card, the merchant should send discounted_amount_used parameter with value true.
+   * Also, the merchant should send original_amount parameter with the original amount of the purchase before applying discount.
+   * In the amount parameter the discounted amount should be sent.
+   */
+  if (canDiscountedAmountBeUsedByTheShop) {
+    purchase.original_amount = purchase.amount;
+    purchase.amount = 10.23;
+    purchase.discounted_amount_used = true;
+  }
 
   /**
    * If we are initiating card storage transaction, then the value of card_storage_type should be set to CARD_STORAGE.
@@ -160,6 +191,62 @@ const changeCardReadiness = (cardReady) => {
     document.getElementById("corvuspay-error").innerHTML = "";
   }
 };
+
+const doOnInstallmentsCalculated = (cardInstallmentsRangeConfig) => {
+    console.log("Card installments calculated: ", cardInstallmentsRangeConfig);
+    if (
+        cardInstallmentsRangeConfig.minInstallments &&
+        cardInstallmentsRangeConfig.minInstallments > 1
+    ) {
+        console.log(`Card installments are available`);
+        // fill numberOfInstallments select with options cardInstallmentsRangeConfig.minInstallments to cardInstallmentsRangeConfig.maxInstallments
+        const numberOfInstallments = document.getElementById(
+            "numberOfInstallments"
+        );
+        numberOfInstallments.innerHTML = "";
+        const option = document.createElement("option");
+        option.value = "00";
+        option.text = "One-time payment";
+        numberOfInstallments.appendChild(option);
+        for (
+            let i = cardInstallmentsRangeConfig.minInstallments;
+            i <= cardInstallmentsRangeConfig.maxInstallments;
+            i++
+        ) {
+            const option = document.createElement("option");
+            // pad number with leading zeros to max 2 digits
+            option.value = i.toString().padStart(2, "0");
+            option.text = i;
+            numberOfInstallments.appendChild(option);
+        }
+        document.getElementById("numberOfInstallments").disabled = false;
+    } else {
+        console.debug(`Card installments are not available`);
+        // remove numberOfInstallments options
+        document.getElementById("numberOfInstallments").innerHTML = "";
+        document.getElementById("numberOfInstallments").disabled = true;
+    }
+}
+
+const doOnCanDiscountedAmountBeUsed = (canDiscountedAmountBeUsed) => {
+    console.debug("Can discounted amount be used: ", canDiscountedAmountBeUsed ? "Yes" : "No");
+    document.getElementById("discountSupported").innerText = canDiscountedAmountBeUsed ? "Yes" : "No";
+    canDiscountedAmountBeUsedByTheShop = canDiscountedAmountBeUsed;
+    if(canDiscountedAmountBeUsed) {
+        document.getElementById("amountWithDiscount").innerText = "10.23";
+    } else {
+        document.getElementById("amountWithDiscount").innerText = "-";
+    }
+}
+
+const doOnCardInfo = (cardInfo) => {
+    console.debug("Card info: ", cardInfo)
+    if(cardInfo) {
+        document.getElementById("cardBrand").innerText = cardInfo;
+    } else {
+        document.getElementById("cardBrand").innerText = "-";
+    }
+}
 
 /**
  * This function is called when card payment is finished.

@@ -6,6 +6,11 @@ const CORVUSPAY_STORE_PUBLIC_KEY = [STORE_PUBLIC_KEY];
  */
 let sessionToken;
 
+/**
+ * will be true if entered BIN is eligible for discounted amount.
+ */
+let canDiscountedAmountBeUsedByTheShop = false;
+
 document.addEventListener("DOMContentLoaded", (event) => {
     const urlParams = new URLSearchParams(window.location.search);
     document.getElementById("status").innerText = urlParams.get("status");
@@ -121,6 +126,21 @@ const showPaymentWithTokenForm = (sessionToken) => {
     // This event is fired when an error occurs within the CorvusFrame form
     cardWithToken.on("error", (errorMsg) => showErrorMessageWithToken(errorMsg));
 
+    //This event is fired when installments are calculated for the card.
+    cardWithToken.on("installments-calculated", (cardInstallmentsRangeConfig) =>
+        doOnInstallmentsCalculated(cardInstallmentsRangeConfig)
+    );
+
+    //This event is fired when discounted amount can be used for the card.
+    cardWithToken.on("can-discounted-amount-be-used", (canDiscountedAmountBeUsed) =>
+        doOnCanDiscountedAmountBeUsed(canDiscountedAmountBeUsed)
+    );
+
+    // This event is fired when the card brand is determined.
+    cardWithToken.on("card-info", (cardInfo) =>
+        doOnCardInfo(cardInfo)
+    );
+    
     // when user clicks on submit button, we are calling initPaymentWithTokenOnBackend function
     // from card object
     document
@@ -142,11 +162,22 @@ const initPaymentWithTokenOnBackend = (e, cardWithToken) => {
         cardholderEmail: "test.test@corvuspay.com",
     };
     const purchase = {
-        amount: 1.23, // amount in currency unit, not cents
+        amount: 12.23, // amount in currency unit, not cents
         currency: "EUR", // currency in ISO 4217 format
         cart: "Product 1", // cart description
     };
 
+    /**
+     * If discounts are available for the card, the merchant should send discounted_amount_used parameter with value true.
+     * Also, the merchant should send original_amount parameter with the original amount of the purchase before applying discount.
+     * In the amount parameter the discounted amount should be sent.
+     */
+    if (canDiscountedAmountBeUsedByTheShop) {
+        purchase.original_amount = purchase.amount;
+        purchase.amount = 10.23;
+        purchase.discounted_amount_used = true;
+    }
+    
     const paymentInfo = {
         // customer: JSON.stringify(customer),
         purchase: JSON.stringify(purchase),
@@ -186,6 +217,62 @@ const initPaymentWithTokenOnBackend = (e, cardWithToken) => {
             }
             removeSpinnerInElement(e.target.parentNode);
         });
+}
+
+const doOnInstallmentsCalculated = (cardInstallmentsRangeConfig) => {
+    console.log("Card installments calculated: ", cardInstallmentsRangeConfig);
+    if (
+        cardInstallmentsRangeConfig.minInstallments &&
+        cardInstallmentsRangeConfig.minInstallments > 1
+    ) {
+        console.log(`Card installments are available`);
+        // fill numberOfInstallments select with options cardInstallmentsRangeConfig.minInstallments to cardInstallmentsRangeConfig.maxInstallments
+        const numberOfInstallments = document.getElementById(
+            "numberOfInstallments"
+        );
+        numberOfInstallments.innerHTML = "";
+        const option = document.createElement("option");
+        option.value = "00";
+        option.text = "One-time payment";
+        numberOfInstallments.appendChild(option);
+        for (
+            let i = cardInstallmentsRangeConfig.minInstallments;
+            i <= cardInstallmentsRangeConfig.maxInstallments;
+            i++
+        ) {
+            const option = document.createElement("option");
+            // pad number with leading zeros to max 2 digits
+            option.value = i.toString().padStart(2, "0");
+            option.text = i;
+            numberOfInstallments.appendChild(option);
+        }
+        document.getElementById("numberOfInstallments").disabled = false;
+    } else {
+        console.debug(`Card installments are not available`);
+        // remove numberOfInstallments options
+        document.getElementById("numberOfInstallments").innerHTML = "";
+        document.getElementById("numberOfInstallments").disabled = true;
+    }
+}
+
+const doOnCanDiscountedAmountBeUsed = (canDiscountedAmountBeUsed) => {
+    console.debug("Can discounted amount be used: ", canDiscountedAmountBeUsed ? "Yes" : "No");
+    document.getElementById("discountSupported").innerText = canDiscountedAmountBeUsed ? "Yes" : "No";
+    canDiscountedAmountBeUsedByTheShop = canDiscountedAmountBeUsed;
+    if(canDiscountedAmountBeUsed) {
+        document.getElementById("amountWithDiscount").innerText = "10.23";
+    } else {
+        document.getElementById("amountWithDiscount").innerText = "-";
+    }
+}
+
+const doOnCardInfo = (cardInfo) => {
+    console.debug("Card info: ", cardInfo)
+    if(cardInfo) {
+        document.getElementById("cardBrand").innerText = cardInfo;
+    } else {
+        document.getElementById("cardBrand").innerText = "-";
+    }
 }
 
 /**

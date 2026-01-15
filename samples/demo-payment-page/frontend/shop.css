@@ -88,3 +88,48 @@
     transform: rotate(360deg);
   }
 }
+
+#card-information {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+#card-information > div {
+    padding: 12px 20px;
+    margin: 8px 0;
+    display: inline-block;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    min-width: 550px;
+}
+
+#card-information h4 {
+    margin: 0 0 20px;
+    font-size: 20px;
+    text-align: center;
+    color: #1f2933;
+}
+
+.row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0;
+}
+
+.label {
+    color: #374151;
+    padding-right: 10px;
+    font-weight: bold;
+}
+
+.value {
+    min-width: 200px;
+    text-align: center;
+    padding: 6px 10px;
+    border-radius: 6px;
+    background: #f9fafb;
+    color: #111827;
+    font-family: monospace;
+}
