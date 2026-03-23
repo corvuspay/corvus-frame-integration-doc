@@ -30,9 +30,9 @@ app.listen(4243, "0.0.0.0", () =>
 app.post("/corvuspay-init-payment", async (req, res) => {
     console.log("/corvuspay-init-payment called", req.body, "\n");
     try {
-        const customer = JSON.parse(req.body.customer);
-        const purchase = JSON.parse(req.body.purchase);
-        const cardStorage = JSON.parse(req.body.cardStorage)
+        const customer = req.body.customer;
+        const purchase = req.body.purchase;
+        const cardStorage = req.body.cardStorage;
 
         const orderNumber = new Date().getTime();
 
@@ -175,12 +175,12 @@ app.post("/corvuspay-check-payment-response", async (req, res) => {
                         res.status(500).send();
                     });
             } else {
-                res.status(200).send();
+                res.status(200).json({ success: true });
             }
         }
     } catch (error) {
         console.error(error);
-        res.status(500).send(error);
+        res.status(500).json({ error: "INTERNAL_SERVER_ERROR" });
     }
 });
 

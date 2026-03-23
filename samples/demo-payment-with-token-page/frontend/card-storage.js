@@ -30,6 +30,8 @@ document.addEventListener("DOMContentLoaded", (event) => {
     showCvv: true, // Set to true if you want to show cvv field
     hideCorvusPayLogo: false, // Set to true if you want to hide the logo
     locale: "hr", //Language used for translating the error messages and labels
+    layout: "default",
+    showLabels: false
   };
 
   /**
@@ -137,9 +139,9 @@ const initCardStoragePaymentOnBackend = (e, card) => {
   }
   
   const paymentInfo = {
-    customer: JSON.stringify(customer),
-    purchase: JSON.stringify(purchase),
-    cardStorage: JSON.stringify(cardStorage),
+    customer: customer,
+    purchase: purchase,
+    cardStorage: cardStorage,
   };
 
   // We are sending paymentInfo to our backend
