@@ -121,19 +121,51 @@ const card = corvuspay.card(option, style, "corvuspay-card-element");
 ```
 
 - `option`: An object containing various optional settings for the CorvusPay form.
+
   | Option | Variable Type | Description |
-  |-------------------|--------------|-----------------------------------------------|
+    |-------------------|--------------|-----------------------------------------------|
   | `showCvv` | Boolean | Set to `true` if you want to show the CVV field.|
   | `hideCorvusPayLogo` | Boolean | Set to `true` if you want to hide the CorvusPay logo.|
-  | `locale` | String | Set to hr if you want the labels and error messages displayed in Croatian. Set to en for labels and error messages in English. Default locale is determined by the browser's settings|
+  | `locale` | String |  Set to `hr`, `en`, or `sr` for language of labels and error messages. Default locale is determined by the browser's settings.|
+  | `layout` | String | Defines form layout. Possible values: `"default"` (inline layout) or `"stacked"` (vertical layout).|
+  | `showLabels` | Boolean | Controls whether labels are displayed above inputs. Works only with `"stacked"` layout.|
 
 ```javascript
 const option = {
   showCvv: true, // Set to true if you want to show the CVV field
   hideCorvusPayLogo: false, // Set to true if you want to hide the CorvusPay logo
   locale: "hr", // Specifies the language used for translating error messages and labels. Currently, only English (en) and Croatian (hr) are supported. If another language is provided or the value is missing, the language will be determined by the browser's settings.
+  layout: "stacked", // "default" | "stacked"
+  showLabels: true   // true | false (only applies when layout is "stacked")
 };
 ```
+##### Layout Examples
+
+Below are examples of how the form looks depending on `layout` and `showLabels` options.
+
+---
+
+**Default layout (`layout: "default"`)**
+
+Compact inline form without labels.
+
+![Default Layout](files/layout-default.png)
+
+---
+
+**Stacked layout without labels (`layout: "stacked", showLabels: false`)**
+
+Compact vertical layout using placeholders instead of labels.
+
+![Stacked Layout Without Labels](files/layout-stacked-no-labels.png)
+
+---
+
+**Stacked layout with labels (`layout: "stacked", showLabels: true`)**
+
+Labels are displayed above inputs for better clarity.
+
+![Stacked Layout With Labels](files/layout-stacked-labels.png)
 
 ##### Styling
 

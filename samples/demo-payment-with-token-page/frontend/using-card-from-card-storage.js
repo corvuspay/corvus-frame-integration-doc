@@ -92,6 +92,8 @@ const showPaymentWithTokenForm = (sessionToken) => {
         showCvv: true, // Set to true if you want to show cvv field
         hideCorvusPayLogo: false, // Set to true if you want to hide the logo
         locale: "hr", //Language used for translating the error messages and labels
+        layout: "default",
+        showLabels: false
     };
 
     /**

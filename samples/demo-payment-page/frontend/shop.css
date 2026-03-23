@@ -14,10 +14,9 @@
   border: 1px solid #ccc;
   border-radius: 4px;
   box-sizing: border-box;
-  min-width: 300px;
+  min-width: 350px;
 }
 .item-button {
-  margin: 0 1.5rem;
   padding: 0.5rem 1.5rem;
   font-weight: bold;
   text-align: center;
@@ -36,7 +35,6 @@
 .item-button-wrapper {
   display: flex;
   align-items: center;
-  justify-content: center;
 }
 
 #corvuspay-payment-form {
