@@ -170,19 +170,21 @@ Labels are displayed above inputs for better clarity.
 ##### Styling
 
 - `style`: An object containing style options for the CorvusPay form.
-  | Option | Variable Type | Description | Format |
-  |------------------|--------------|---------------------------------------------------------|--------------------|
-  | `backgroundColor`| String | Background color of the form. | Hexadecimal, e.g., "#ffffff" |
-  | `fontFamily` | String | Font family of the form. | - |
-  | `fontSize` | Numeric | Font size of the form, should be provided as a numeric. | Numeric |
-  | `fontColor`| String | Font color of the form. | Hexadecimal, e.g., "#000000" |
 
+| Option            | Variable Type | Description                                      | Format                          |
+|------------------|--------------|--------------------------------------------------|----------------------------------|
+| `backgroundColor`| String       | Background color of the form.                    | Hexadecimal, e.g., "#ffffff"     |
+| `fontFamily`     | String       | Font family of the form.                         | -                                |
+| `fontSize`       | Numeric      | Font size of the form.                           | Numeric                          |
+| `fontColor`      | String       | Font color of the form.                          | Hexadecimal, e.g., "#000000"     |
+| `borderColor`    | String       | Border color of form fields and container.       | Hexadecimal, e.g., "#dedede"     |
 ```javascript
 const style = {
   backgroundColor: "#ffffff", // Background color of the form
   fontFamily: "Arial", // Font family of the form
   fontSize: 13, // Font size of the form
   fontColor: "#000000", // Font color of the form
+  borderColor: "#dedede", // Border color of the form fields and container
 };
 ```
 
