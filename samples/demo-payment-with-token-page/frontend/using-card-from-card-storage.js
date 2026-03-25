@@ -102,12 +102,14 @@ const showPaymentWithTokenForm = (sessionToken) => {
      * fontFamily: Font family of the form
      * fontSize: Font size of the form
      * fontColor: Font color of the form
+     * borderColor: Border color of the form
      */
     const style = {
         // backgroundColor: "#ffffff", // Background color of the form
         // fontFamily: "Arial", // Font family of the form
         // fontSize: 13, // Font size of the form
         // fontColor: "#000000", // Font color of the form
+        // borderColor: "#000000", // Border color of the form
     };
 
     const cardWithToken = corvuspay.cardWithToken(sessionToken, option, style, "corvuspay-with-token-card-element");
