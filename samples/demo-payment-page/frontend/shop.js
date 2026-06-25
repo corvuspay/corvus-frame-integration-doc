@@ -20,7 +20,6 @@ document.addEventListener("DOMContentLoaded", (event) => {
   const corvuspay = CorvusPay.init(requiredParameters, optionalParameters);
 
   const option = {
-    showCvv: true, // Set to true if you want to show cvv field
     hideCorvusPayLogo: false, // Set to true if you want to hide the logo
     locale: "en", //Language used for translating the error messages and labels
     layout: "default",
@@ -97,6 +96,7 @@ const initPaymentOnBackend = (e, card) => {
     cardholderZipCode: "10000",
     cardholderCountry: "Croatia",
     cardholderEmail: "test.test@corvuspay.com",
+    cardholderCountryCode: "HR"
   };
 
   /**

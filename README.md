@@ -14,15 +14,20 @@
     - [Initiate Payment](#initiate-payment)
     - [Post-Payment Handling with `doOnFinishCardPayment`](#post-payment-handling-with-doonfinishcardpayment)
     - [Error Handling](#error-handling)
-    - [Initialize CorvusFrame for card storage (saving card with card storage)](#initialize-corvusframe-for-card-storage)
-    - [Initiate payment with token (using card saved with card storage)](#initiate-payment-with-token)
+    - [Card Storage](#card-storage)
+      - [Saving a card for later use](#saving-a-card-for-later-use)
+      - [Using a saved card](#using-a-saved-card)
+    - [Subscription](#subscription)
+      - [Initialize a subscription payment](#initializing-a-subscription-payment)
 - [Backend Integration](#backend-integration)
   - [API Reference](#api-reference)
     - [Securing API Requests](#securing-api-requests)
     - [Initialize Payment](#initialize-payment)
+    - [Card Storage API Flow](#card-storage-api-flow)
+    - [Subscription API Flow](#subscription-api-flow)
     - [Get Card token](#get-card-token)
     - [Get session token](#get-session-token)
-    - [Initialize payment with token (using card saved with card storage)](#initialize-payment-with-token)
+    - [Initialize Payment with Token (Card Storage Only)](#initialize-payment-with-token-card-storage-only)
   - [Calculate Signature](#calculate-signature)
   - [Further Reading](#further-reading)
 
@@ -132,7 +137,6 @@ const card = corvuspay.card(option, style, "corvuspay-card-element");
 
 ```javascript
 const option = {
-  showCvv: true, // Set to true if you want to show the CVV field
   hideCorvusPayLogo: false, // Set to true if you want to hide the CorvusPay logo
   locale: "hr", // Specifies the language used for translating error messages and labels. Currently, only English (en) and Croatian (hr) are supported. If another language is provided or the value is missing, the language will be determined by the browser's settings.
   layout: "stacked", // "default" | "stacked"
@@ -260,6 +264,7 @@ To initiate a payment, customer and purchase information is first collected. Thi
     cardholderZipCode: "10000",
     cardholderCountry: "Croatia",
     cardholderEmail: "test.test@corvuspay.com",
+    cardholderCountryCode: "HR"
   };
 
   // Sample purchase details
@@ -269,11 +274,11 @@ To initiate a payment, customer and purchase information is first collected. Thi
     cart: "Product 1", // cart description
   };
   
-  //If discount can be used we should sent additional fields in the request
+  // If discount can be used, send additional fields in the request
   if (canDiscountedAmountBeUsedByTheShop) {
-    purchase.original_amount = purchase.amount; // the originial amount without disocunt
-    purchase.amount = 10.23; //the amount with discount that will be used for charging the customer
-    purchase.discounted_amount_used = true; //boolean that tells us that discount is used
+    purchase.original_amount = purchase.amount; // the original amount without discount
+    purchase.amount = 10.23; // the amount with discount that will be used for charging the customer
+    purchase.discounted_amount_used = true; // boolean that tells us that discount is used
   }
 
   const paymentInfo = {
@@ -326,45 +331,64 @@ After the payment process is complete, the doOnFinishCardPayment function is inv
 
 Error messages can be displayed using the `corvuspay-error` element in HTML. Capture and handle errors appropriately in your JavaScript code.
 
-### Initialize CorvusFrame for card storage
-CorvusFrame supports card storage functionality. To use this feature, you must first initiate a card storage transaction 
-in which the customer's details are stored for future use. Later on, the customer only needs to enter the CVV and confirm
-their identity. Given that, for each subsequent payment for the same customer, the merchant should display the CorvusFrame
-form with a token.
+### Card Storage
 
-#### Saving a card for card storage
-In order to save a card for card storage, you should initialize CorvusFrame as described above. There are some parameters
-that should be sent to the CorvusPay backend when initiating a card storage transaction (saving a card for card storage),
-described in the Backend Integration part of the document. If the initial transaction is successful, the backend should
-send a request to fetch the card token, used for future payment, also described in the Backend Integration part.
+Use card storage when the customer wants to save a card for later checkout payments with the same merchant. The saved card 
+is linked only to that specific merchant and cannot be used by other merchants.
 
-#### Using a card from card storage
-When saved card from card storage is used, the customer does not need to re-enter their payment details. The customer should only enter
-CVV and confirm their identity using 3D secure. For that reason, in your application you do not need to initialize the
-CorvusFrame as described before, you should initialize CorvusFrame with token in which the customer's payment info will
-be populated with the saved card.
+In this flow, the merchant identifies the customer with `user_card_profiles_id`, stores the returned card token on the 
+backend, and later uses both values to display CorvusFrame with the saved card data.
+
+Card storage is separate from subscription. If the goal is to register a card for a recurring subscription payment, use the
+[Subscription](#subscription) chapter instead.
+
+#### Saving a card for later use
+
+To save a card, initialize and display the standard CorvusFrame card form with `corvuspay.card(...)`, exactly as in the
+standard payment flow. The customer enters the full card data for this initial transaction.
+
+When the shop backend initializes this payment, it must send the additional card storage fields described in
+[Card Storage API Flow](#card-storage-api-flow):
+
+- `save_card: true`
+- `card_storage_type: "CARD_STORAGE"`
+- `user_card_profiles_id`: the customer identifier from the merchant system
+
+After the initial payment is approved, the shop backend should call `/api/js/1.0/get-token` and store the returned
+`token_value` together with the same `user_card_profiles_id`. These values are needed when the customer later pays with
+the saved card.
+
+#### Using a saved card
+
+When a saved card is used, the customer does not re-enter the full card details. The customer only enters the required CVV,
+if CVV is requested, and confirms their identity when 3D Secure authentication is required.
+
+Before displaying the saved-card form, the shop backend must fetch a temporary `session_token` using the saved
+`user_card_profiles_id` and `token_value`. See [Get session token](#get-session-token).
 
 ##### Initialize CorvusFrame form with token
-Before initializing and displaying the payment form with token in your application, you should first fetch session token
-using the user_card_profiles_id used for the customer when saving the card for future use and the card token acquired
-during the initial transaction. The code for initializing the CorvusFrame with token is the same as before.
+
+The base CorvusFrame initialization is the same as for standard payments:
 
 ```javascript
 const corvuspay = CorvusPay.init(requiredParameters, optionalParameters);
 ```
 
 ##### Set up CorvusPay form with token
-After CorvusFrame is initialized, you should set up the CorvusPay form with token in your application using the cardWithToken
-method. The `corvuspay.cardWithToken` method accepts four arguments: `sessionToken`, `option`, `style`, and `elementAttachIdTo`.
-The only difference from the previous setup is the session token. The process for handling events is the same.
+After CorvusFrame is initialized, display the saved-card form with `cardWithToken`. The `corvuspay.cardWithToken` method
+accepts four arguments: `sessionToken`, `option`, `style`, and `elementAttachIdTo`.
+
 ```javascript
 const cardWithToken = corvuspay.cardWithToken(sessionToken, option, style, "corvuspay-card-with-token-element");
 ```
 
+Use the same event handlers as the standard card form.
+
 ##### Initiate payment with token
-The process for initiating payment with token is similar with the previous example. First, customer and purchase information
-should be collected and along with them session token should be sent to the backend for further processing. Example code snippet
-that demonstrates the payment initiation process.
+
+For a saved-card payment, send the purchase data and `sessionToken` to the shop backend. The backend should initialize the
+payment with `/api/js/1.0/init-payment-with-token`; see
+[Initialize Payment with Token (Card Storage Only)](#initialize-payment-with-token-card-storage-only).
 
 ```javascript
   // Sample purchase details
@@ -374,11 +398,11 @@ that demonstrates the payment initiation process.
     cart: "Product 1", // cart description
   };
 
-  //If discount can be used we should sent additional fields in the request
+  // If discount can be used, send additional fields in the request
   if (canDiscountedAmountBeUsedByTheShop) {
-    purchase.original_amount = purchase.amount; // the originial amount without disocunt
-    purchase.amount = 10.23; //the amount with discount that will be used for charging the customer
-    purchase.discounted_amount_used = true; //boolean that tells us that discount is used
+    purchase.original_amount = purchase.amount; // the original amount without discount
+    purchase.amount = 10.23; // the amount with discount that will be used for charging the customer
+    purchase.discounted_amount_used = true; // boolean that tells us that discount is used
   }
 
   const paymentInfo = {
@@ -396,12 +420,40 @@ that demonstrates the payment initiation process.
   })
   ...
 ```
-The shop's backend should then call the CorvusPay API to initialize the payment. Just like before the API response will contain
-the payment ID used to complete the payment. Next, the `cardWithToken.finishCardPayment` method should be called as described
-in the previous example.
+
+The shop backend response contains the `payment_id` used to complete the saved-card payment:
+
 ```javascript
 cardWithToken.finishCardPayment(data.payment_id, doOnFinishCardPayment);
 ```
+
+### Subscription
+
+Use subscription when the initial payment should register the card for a recurring subscription flow. This is not the same
+as card storage for customer-selected saved cards.
+
+For a standard subscription setup:
+
+- Use the standard CorvusFrame card form with `corvuspay.card(...)`.
+- The customer enters the full card data during the initial subscription payment.
+- The backend initializes the payment with `save_card: true` and `card_storage_type: "SUBSCRIPTION"`.
+- Do not send `user_card_profiles_id` for a standard subscription.
+- Do not use `cardWithToken`, `/api/js/1.0/get-session-token`, or `/api/js/1.0/init-payment-with-token` for the subscription setup.
+
+#### Initializing a subscription payment
+
+Initialize CorvusFrame and set up the card form as described in [Initialize CorvusFrame](#initialize-corvusframe) and
+[Set up CorvusPay form](#set-up-corvuspay-form). When the customer submits the payment, send the customer and purchase
+data to the shop backend.
+
+The shop backend should initialize the subscription payment with the additional fields described in
+[Subscription API Flow](#subscription-api-flow):
+
+- `save_card: true`
+- `card_storage_type: "SUBSCRIPTION"`
+
+After the initial subscription payment is approved, the shop backend should call `/api/js/1.0/get-token` and handle the
+returned token according to the subscription process agreed with CorvusPay.
 
 ---
 
@@ -414,7 +466,7 @@ For complete JavaScript code for saving a card with card storage and using a sav
 Before diving into the API Reference, it's essential to understand how to integrate CorvusPay with your shop's backend. The backend plays a crucial role in:
 
 - Initializing payments and generating a payment ID
-- Fetching tokens for tokenization functionality
+- Fetching tokens for card storage or subscription flows
 - Validating the `signature` using the Store Secret Key
 - Handling various transaction states such as success, failure, and pending transactions
 
@@ -424,7 +476,7 @@ Please proceed to the API Reference for a detailed explanation of each API endpo
 
 ### API Reference
 
-For testing purposes, use the following URL: `https://test-wallet.corvuspay.com`.
+For testing purposes, use the following URL: `https://wallet.test.corvuspay.com`.
 
 For production, use: `https://wallet.corvuspay.com`.
 
@@ -439,32 +491,38 @@ Initialize payment by sending a POST request to the following endpoint:
 
 `endpoint: /api/js/1.0/init-payment`
 
+Use this endpoint for a standard one-time payment, for the initial card storage payment, and for the initial subscription
+payment. The table below contains the common request fields. If you are starting card storage or subscription, add only
+the extra fields from the matching chapter:
+
+- [Card Storage API Flow](#card-storage-api-flow)
+- [Subscription API Flow](#subscription-api-flow)
+
 ##### Request Body
 
-| Parameter                | Data Type | Required   | Example        | Description                                                                                                                                                                                                                                                                                                                                                                                                        |
-|--------------------------|-----------|------------|----------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `version`                | String    | Yes        | "1.4"          | Version of CorvusPay API                                                                                                                                                                                                                                                                                                                                                                                           |
-| `store_id`               | String    | Yes        | "1"            | Store Id                                                                                                                                                                                                                                                                                                                                                                                                           |
-| `order_number`           | String    | Yes        | "ORDER_123"    | Unique order number                                                                                                                                                                                                                                                                                                                                                                                                |
-| `language`               | String    | No         | "hr"           | ISO 639-1 language code                                                                                                                                                                                                                                                                                                                                                                                            |
-| `currency`               | String    | Yes        | "EUR"          | Currency in ISO 4217 format                                                                                                                                                                                                                                                                                                                                                                                        |
-| `amount`                 | String    | Yes        | "123.54"       | Amount to be charged in currency unit                                                                                                                                                                                                                                                                                                                                                                              |
-| `cart`                   | String    | Yes        | "2x Item"      | Shopping-cart contents description                                                                                                                                                                                                                                                                                                                                                                                 |
-| `require_complete`       | Boolean   | Yes        | `true`         | If `true`, payment will be finished only when order completion is confirmed                                                                                                                                                                                                                                                                                                                                        |
-| `signature`              | String    | Yes        | _Calculated_   | HMAC-SHA256 signature. See [Calculate Signature](#calculate-signature)                                                                                                                                                                                                                                                                                                                                             |
-| `save_card`              | Boolean   | No         | `false`        | Indicates if the payment is to save card                                                                                                                                                                                                                                                                                                                                                                           |
-| `cardholder_name`        | String    | Yes        | "John"         | Name of the cardholder                                                                                                                                                                                                                                                                                                                                                                                             |
-| `cardholder_surname`     | String    | Yes        | "Doe"          | Surname of the cardholder                                                                                                                                                                                                                                                                                                                                                                                          |
-| `cardholder_address`     | String    | No         | "123 St"       | Address of the cardholder                                                                                                                                                                                                                                                                                                                                                                                          |
-| `cardholder_city`        | String    | No         | "Zagreb"       | City of the cardholder                                                                                                                                                                                                                                                                                                                                                                                             |
-| `cardholder_zip_code`    | String    | No         | "10000"        | ZIP code of the cardholder                                                                                                                                                                                                                                                                                                                                                                                         |
-| `cardholder_country`     | String    | No         | "Croatia"      | Country of the cardholder                                                                                                                                                                                                                                                                                                                                                                                          |
-| `cardholder_email`       | String    | Yes        | "a@a.com"      | Email address of the cardholder                                                                                                                                                                                                                                                                                                                                                                                    |
-| `number_of_installments` | String    | No         | 06             | The number of installments selected for the payment. Set this field only if the `installments-calculated` event returns a `minInstallments` value greater than 1, indicating that installment payments are available. The value should fall between the returned `minInstallments` and `maxInstallments`.                                                                                                          |
-| `card_storage_type`      | String    | No         | "CARD_STORAGE" | If the payment is to save card, this parameter should be sent. There are 2 values for this parameter: `CARD_STORAGE` or `SUBSCRIPTION`. If `CARD_STORAGE` is sent, you should also send `user_card_profiles_id` and later on you should initiate payment with token for the specified customer. For standard subscription the merchant should only send the card_storage_type parameter with value `SUBSCRIPTION`. |
-| `user_card_profiles_id`  | String    | No         | "SHOP_12346"   | Customer identifier in the merchant's system. This value is mandatory if you want to initiate card storage transaction. (`card_storage_type` set to `CARD_STORAGE`). Later this value will be used to fetch session token and initiate payment with token.                                                                                                                                                         |
-| `original_amount`        | String    | No         | "123.54"       | Amount before applied discount                                                                                                                                                                                                                                                                                                                                                                                     |
-| `discounted_amount_used` | Boolean   | No         | `true`         | Indicates if discounted amount is used                                                                                                                                                                                                                                                                                                                                                                             |
+| Parameter                 | Data Type | Required | Example        | Description                                                                                                                                                                                                                                                                                                                                                                                                        |
+|---------------------------|-----------|----------|----------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `version`                 | String    | Yes      | "1.6"          | Version of CorvusPay API                                                                                                                                                                                                                                                                                                                                                                                           |
+| `store_id`                | String    | Yes      | "1"            | Store Id                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `order_number`            | String    | Yes      | "ORDER_123"    | Unique order number                                                                                                                                                                                                                                                                                                                                                                                                |
+| `language`                | String    | No       | "hr"           | ISO 639-1 language code                                                                                                                                                                                                                                                                                                                                                                                            |
+| `currency`                | String    | Yes      | "EUR"          | Currency in ISO 4217 format                                                                                                                                                                                                                                                                                                                                                                                        |
+| `amount`                  | String    | Yes      | "123.54"       | Amount to be charged in currency unit                                                                                                                                                                                                                                                                                                                                                                              |
+| `cart`                    | String    | Yes      | "2x Item"      | Shopping-cart contents description                                                                                                                                                                                                                                                                                                                                                                                 |
+| `require_complete`        | Boolean   | Yes      | `true`         | If `true`, payment will be finished only when order completion is confirmed                                                                                                                                                                                                                                                                                                                                        |
+| `signature`               | String    | Yes      | _Calculated_   | HMAC-SHA256 signature. See [Calculate Signature](#calculate-signature)                                                                                                                                                                                                                                                                                                                                             |
+| `save_card`               | Boolean   | No       | `false`        | Use `false` or omit for standard one-time payments. Use `true` only for card storage or subscription flows.                                                                                                                                                                                                                                                                                                       |
+| `cardholder_name`         | String    | Yes      | "John"         | Name of the cardholder                                                                                                                                                                                                                                                                                                                                                                                             |
+| `cardholder_surname`      | String    | Yes      | "Doe"          | Surname of the cardholder                                                                                                                                                                                                                                                                                                                                                                                          |
+| `cardholder_address`      | String    | No       | "123 St"       | Address of the cardholder                                                                                                                                                                                                                                                                                                                                                                                          |
+| `cardholder_city`         | String    | No       | "Zagreb"       | City of the cardholder                                                                                                                                                                                                                                                                                                                                                                                             |
+| `cardholder_zip_code`     | String    | No       | "10000"        | ZIP code of the cardholder                                                                                                                                                                                                                                                                                                                                                                                         |
+| `cardholder_country`      | String    | No       | "Croatia"      | Country of the cardholder                                                                                                                                                                                                                                                                                                                                                                                          |
+| `cardholder_country_code` | String    | Yes      | "HR"           | Two-letter ISO 3166-1 alpha-2 country code of the cardholder                                                                                                                                                                                                                                                                                                                                                       |
+| `cardholder_email`        | String    | Yes      | "a@a.com"      | Email address of the cardholder                                                                                                                                                                                                                                                                                                                                                                                    |
+| `number_of_installments`  | String    | No       | 06             | The number of installments selected for the payment. Set this field only if the `installments-calculated` event returns a `minInstallments` value greater than 1, indicating that installment payments are available. The value should fall between the returned `minInstallments` and `maxInstallments`.                                                                                                          |
+| `original_amount`         | String    | No       | "123.54"       | Amount before applied discount                                                                                                                                                                                                                                                                                                                                                                                     |
+| `discounted_amount_used`  | Boolean   | No       | `true`         | Indicates if discounted amount is used                                                                                                                                                                                                                                                                                                                                                                             |
 
 ##### Response Body
 
@@ -477,7 +535,7 @@ Initialize payment by sending a POST request to the following endpoint:
 ```javascript
 // create the request body
 const initPaymentRequest = {
-  version: "1.4", // version of CorvusPay API
+  version: "1.6", // version of CorvusPay API
   store_id: CORVUSPAY_STORE_ID,
   // ... [rest of the fields]
 };
@@ -507,18 +565,113 @@ let cpReq = https.request(options, function (cpRes) {
 }
 ```
 
+#### Card Storage API Flow
+
+Use this flow when the merchant wants to let a customer save a card and use it for later checkout payments.
+
+The initial card storage transaction uses the same `/api/js/1.0/init-payment` endpoint as a standard payment. The frontend
+should display the standard CorvusFrame card form with `corvuspay.card(...)`, because the customer enters the full card data
+for this first transaction.
+
+##### Additional `init-payment` fields for card storage
+
+| Parameter               | Data Type | Required | Example        | Description                                                                                          |
+|-------------------------|-----------|----------|----------------|------------------------------------------------------------------------------------------------------|
+| `save_card`             | Boolean   | Yes      | `true`         | Must be `true` when saving a card for card storage.                                                  |
+| `card_storage_type`     | String    | Yes      | "CARD_STORAGE" | Selects the card storage flow.                                                                       |
+| `user_card_profiles_id` | String    | Yes      | "SHOP_12346"   | Customer identifier from the merchant system. This value is later used to fetch the session token.   |
+
+##### Example of initializing card storage payment
+
+```javascript
+const initCardStoragePaymentRequest = {
+  version: "1.6",
+  store_id: CORVUSPAY_STORE_ID,
+  order_number: orderNumber,
+  currency: purchase.currency,
+  amount: purchase.amount,
+  cart: purchase.cart,
+  require_complete: true,
+  save_card: true,
+  card_storage_type: "CARD_STORAGE",
+  user_card_profiles_id: userCardProfileId,
+  cardholder_name: customer.cardholderName,
+  cardholder_surname: customer.cardholderSurname,
+  cardholder_country_code: customer.cardholderCountryCode,
+  cardholder_email: customer.cardholderEmail,
+};
+```
+
+After the initial card storage payment is approved, call `/api/js/1.0/get-token` and store the returned `token_value`
+together with `user_card_profiles_id`. For later payments with this saved card:
+
+1. Fetch a `session_token` with `/api/js/1.0/get-session-token`.
+2. Display the saved-card form with `corvuspay.cardWithToken(sessionToken, option, style, elementAttachIdTo)`.
+3. Initialize the payment with `/api/js/1.0/init-payment-with-token`.
+4. Complete the payment with `cardWithToken.finishCardPayment(...)`.
+
+#### Subscription API Flow
+
+Use this flow when the initial payment should register a card for a recurring subscription. This flow is separate from
+card storage for customer-selected saved cards.
+
+The initial subscription transaction uses the same `/api/js/1.0/init-payment` endpoint as a standard payment. The frontend
+should display the standard CorvusFrame card form with `corvuspay.card(...)`.
+
+##### Additional `init-payment` fields for subscription
+
+| Parameter           | Data Type | Required | Example        | Description                                      |
+|---------------------|-----------|----------|----------------|--------------------------------------------------|
+| `save_card`         | Boolean   | Yes      | `true`         | Must be `true` when starting a subscription.     |
+| `card_storage_type` | String    | Yes      | "SUBSCRIPTION" | Selects the subscription flow.                   |
+
+Do not send `user_card_profiles_id` for a standard subscription. That field belongs to the card storage flow.
+
+##### Example of initializing subscription payment
+
+```javascript
+const initSubscriptionPaymentRequest = {
+  version: "1.6",
+  store_id: CORVUSPAY_STORE_ID,
+  order_number: orderNumber,
+  currency: purchase.currency,
+  amount: purchase.amount,
+  cart: purchase.cart,
+  require_complete: true,
+  save_card: true,
+  card_storage_type: "SUBSCRIPTION",
+  cardholder_name: customer.cardholderName,
+  cardholder_surname: customer.cardholderSurname,
+  cardholder_country_code: customer.cardholderCountryCode,
+  cardholder_email: customer.cardholderEmail,
+};
+```
+
+After the initial subscription payment is approved, call `/api/js/1.0/get-token` and handle the returned token according
+to the subscription process agreed with CorvusPay. Do not use `/api/js/1.0/get-session-token`,
+`corvuspay.cardWithToken(...)`, or `/api/js/1.0/init-payment-with-token` for the standard subscription setup.
+
 #### Get Card token
 
-When we want to save card for later use (when save_card is set to true and card_storage_type is either `SUBSCRIPTION` or `CARD_STORAGE`),
-we need to get card token. Card token is used for future payments. To get card token, send a POST request to the following endpoint:
+Call this endpoint after an approved initial payment where `save_card` was set to `true`:
+
+- For card storage, `card_storage_type` was `CARD_STORAGE`. Store the returned `token_value` with the customer's
+  `user_card_profiles_id`.
+- For subscription, `card_storage_type` was `SUBSCRIPTION`. Use the returned token for initiating next subscription payment,
+as documented in the CorvusPay Integration manual.
+
+Do not call this endpoint for standard one-time payments or for later saved-card payments initialized with
+`/api/js/1.0/init-payment-with-token`.
+
+To get the card token, send a POST request to the following endpoint:
 
 `endpoint: /api/js/1.0/get-token`
 
 ##### Request Body
 
 | Parameter    | Data Type | Required | Example                          | Description                                                  |
-| ------------ | --------- | -------- | -------------------------------- | ------------------------------------------------------------ |
-| `version`    | String    | No       | `1.4`                            | API version. Should be 1.4                                   |
+| ------------ | --------- | -------- |----------------------------------|--------------------------------------------------------------|
+| `version`    | String    | No       | `1.6`                            | API version. Should be 1.6                                   |
 | `store_id`   | String    | Yes      | `123`                            | Store Id                                                     |
 | `payment_id` | String    | No       | `ip_hkBWcPgFom...Kn51F9k4WCWeKo` | Payment Id                                                   |
 | `signature`  | String    | Yes      | `4be5aef695c...8b2ad4de5c74`     | HMAC-SHA256. See [Calculate Signature](#calculate-signature) |
@@ -547,7 +700,7 @@ const options = {
     };
 
     let requestBody = {
-      version: "1.4",
+      version: "1.6",
       store_id: storeId,
       payment_id: paymentId,
     };
@@ -562,9 +715,13 @@ const options = {
 ```
 
 #### Get session token
-If you want to use a saved card from card storage, you should first fetch the session token associated with the user_card_profiles_id and the token acquired in
-the initial request for saving the card. This session token is used when initializing the CorvusFrame form with a token.
-To fetch the session token, send a POST request to the following endpoint:
+
+Use this endpoint only for card storage, when the customer chooses a saved card for a later checkout payment. It is not
+used for the standard subscription flow.
+
+Before rendering `corvuspay.cardWithToken(...)`, fetch a temporary `session_token` using the `user_card_profiles_id` and
+the `token_value` saved after the initial card storage transaction. To fetch the session token, send a POST request to the
+following endpoint:
 
 `endpoint: /api/js/1.0/get-session-token`
 
@@ -572,7 +729,7 @@ To fetch the session token, send a POST request to the following endpoint:
 
 | Parameter               | Data Type | Required | Example                      | Description                                                         |
 |-------------------------| --------- | -------- |------------------------------|---------------------------------------------------------------------|
-| `version`               | String    | No       | `1.4`                        | API version. Should be 1.4                                          |
+| `version`               | String    | No       | `1.6`                        | API version. Should be 1.6                                          |
 | `store_id`              | String    | Yes      | `123`                        | Store Id                                                            |
 | `user_card_profiles_id` | String    | Yes      | `SHOP_12346`                 | User card profiles id used when initiating card storage transaction |
 | `token_value`           | String    | Yes      | `5vNzKHNeCvWvc3pSOWIBMe`     | Token value, acquired in the get_token call                         |
@@ -600,7 +757,7 @@ To fetch the session token, send a POST request to the following endpoint:
       },
     };
     let requestBody = {
-      version: "1.4",
+      version: "1.6",
       store_id: storeId,
       user_card_profiles_id: userCardProfileId,
       token_value: token_value,
@@ -613,29 +770,34 @@ To fetch the session token, send a POST request to the following endpoint:
     }
     
 ```
-#### Initialize Payment with token
-After the initial call for saving a card for card storage, every subsequent call for the same customer should be a request for
-initializing payment with token using the session id for the customer, by sending a POST request to the following url:
+
+#### Initialize Payment with Token (Card Storage Only)
+
+Use this endpoint only for later payments with a card saved through the card storage flow. It is not used for standard
+one-time payments or for the standard subscription setup.
+
+After fetching a `session_token` for the saved card, initialize the saved-card payment by sending a POST request to the
+following endpoint:
 
 `endpoint: /api/js/1.0/init-payment-with-token`
 
 ##### Request Body
 
-| Parameter                | Data Type | Required | Example                                          | Description                                                                                                                                                                                                                                                                                               |
-|--------------------------|-----------|----------|--------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `version`                | String    | Yes      | "1.4"                                            | Version of CorvusPay API                                                                                                                                                                                                                                                                                  |
-| `session_token`          | String    | Yes      | "st_M09BTYSZ3w7tq4V3DrabsWVPjO7uYr9kC6UI6aFeHY8" | Session token acquired in the previous step                                                                                                                                                                                                                                                               |
-| `store_id`               | String    | Yes      | "1"                                              | Store Id                                                                                                                                                                                                                                                                                                  |
-| `order_number`           | String    | Yes      | "ORDER_123"                                      | Unique order number                                                                                                                                                                                                                                                                                       |
-| `language`               | String    | No       | "hr"                                             | ISO 639-1 language code                                                                                                                                                                                                                                                                                   |
-| `currency`               | String    | Yes      | "EUR"                                            | Currency in ISO 4217 format                                                                                                                                                                                                                                                                               |
-| `amount`                 | String    | Yes      | "123.54"                                         | Amount to be charged in currency unit                                                                                                                                                                                                                                                                     |
-| `cart`                   | String    | Yes      | "2x Item"                                        | Shopping-cart contents description                                                                                                                                                                                                                                                                        |
-| `require_complete`       | Boolean   | Yes      | `true`                                           | If `true`, payment will be finished only when order completion is confirmed                                                                                                                                                                                                                               |
-| `number_of_installments` | String    | No       | 06                                               | The number of installments selected for the payment. Set this field only if the `installments-calculated` event returns a `minInstallments` value greater than 1, indicating that installment payments are available. The value should fall between the returned `minInstallments` and `maxInstallments`. |
-| `signature`              | String    | Yes      | _Calculated_                                     | HMAC-SHA256 signature. See [Calculate Signature](#calculate-signature)                                                                                                                                                                                                                                    |
-| `original_amount`        | String    | No       | "123.54"                                         | Amount before applied discount                                                                                                                                                                                                                                                                            |
-| `discounted_amount_used` | Boolean   | No       | `true`                                           | Indicates if discounted amount is used                                                                                                                                                                                                                                                                    |
+| Parameter                | Data Type | Required | Example        | Description                                                                                                                                                                                                                                                                                               |
+|--------------------------|-----------|----------|----------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `version`                | String    | Yes      | "1.6"          | Version of CorvusPay API                                                                                                                                                                                                                                                                                  |
+| `session_token`          | String    | Yes      | "st_M09...HY8" | Session token acquired in the previous step                                                                                                                                                                                                                                                               |
+| `store_id`               | String    | Yes      | "1"            | Store Id                                                                                                                                                                                                                                                                                                  |
+| `order_number`           | String    | Yes      | "ORDER_123"    | Unique order number                                                                                                                                                                                                                                                                                       |
+| `language`               | String    | No       | "hr"           | ISO 639-1 language code                                                                                                                                                                                                                                                                                   |
+| `currency`               | String    | Yes      | "EUR"          | Currency in ISO 4217 format                                                                                                                                                                                                                                                                               |
+| `amount`                 | String    | Yes      | "123.54"       | Amount to be charged in currency unit                                                                                                                                                                                                                                                                     |
+| `cart`                   | String    | Yes      | "2x Item"      | Shopping-cart contents description                                                                                                                                                                                                                                                                        |
+| `require_complete`       | Boolean   | Yes      | `true`         | If `true`, payment will be finished only when order completion is confirmed                                                                                                                                                                                                                               |
+| `number_of_installments` | String    | No       | 06             | The number of installments selected for the payment. Set this field only if the `installments-calculated` event returns a `minInstallments` value greater than 1, indicating that installment payments are available. The value should fall between the returned `minInstallments` and `maxInstallments`. |
+| `signature`              | String    | Yes      | _Calculated_   | HMAC-SHA256 signature. See [Calculate Signature](#calculate-signature)                                                                                                                                                                                                                                    |
+| `original_amount`        | String    | No       | "123.54"       | Amount before applied discount                                                                                                                                                                                                                                                                            |
+| `discounted_amount_used` | Boolean   | No       | `true`         | Indicates if discounted amount is used                                                                                                                                                                                                                                                                    |
 
 ##### Response Body
 
@@ -648,7 +810,7 @@ initializing payment with token using the session id for the customer, by sendin
 ```javascript
 // create the request body
 const initPaymentWithTokenRequest = {
-  version: "1.4", // version of CorvusPay API
+  version: "1.6", // version of CorvusPay API
   store_id: CORVUSPAY_STORE_ID,
   session_token: sessionToken, // session token received in the fetch-session-token call
   // ... [rest of the fields]
