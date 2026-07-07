@@ -127,14 +127,14 @@ const card = corvuspay.card(option, style, "corvuspay-card-element");
 
 - `option`: An object containing various optional settings for the CorvusPay form.
 
-  | Option | Variable Type | Description                                                                                                                                                                          |
-    |-------------------|---------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-  | `showCvv` | Boolean       | Set to `true` if you want to show the CVV field.                                                                                                                                     |
-  | `hideCorvusPayLogo` | Boolean       | Set to `true` if you want to hide the CorvusPay logo.                                                                                                                                |
-  | `locale` | String        | Set to `hr`, `en`, or `sr` for language of labels and error messages. Default locale is determined by the browser's settings.                                                        |
-  | `layout` | String        | Defines form layout. Possible values: `"default"` (inline layout) or `"stacked"` (vertical layout).                                                                                  |
-  | `showLabels` | Boolean       | Controls whether labels are displayed above inputs. Works only with `"stacked"` layout.                                                                                              |
-  |`hideStoredCardDetails` | Boolean | When set to true, hides the stored card information (masked card number and expiration date) when a saved card is used. If CVV entry is required, only the CVV input is displayed; otherwise, an empty container is rendered. |
+  | Option | Variable Type | Description                                                                                                                                                                                                                            |
+    |-------------------|---------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+  | `showCvv` | Boolean       | Set to `true` if you want to show the CVV field.                                                                                                                                                                                       |
+  | `hideCorvusPayLogo` | Boolean       | Set to `true` if you want to hide the CorvusPay logo.                                                                                                                                                                                  |
+  | `locale` | String        | Set to `hr`, `en`, or `sr` for language of labels and error messages. Default locale is determined by the browser's settings.                                                                                                          |
+  | `layout` | String        | Defines form layout. Possible values: `"default"` (inline layout) or `"stacked"` (vertical layout).                                                                                                                                    |
+  | `showLabels` | Boolean       | Controls whether labels are displayed above inputs. Works only with `"stacked"` layout.                                                                                                                                                |
+  |`cvvOnly` | Boolean | When set to true, the saved-card form hides the stored card information (masked card number and expiration date) and displays only the CVV input. If CVV entry is not required, an empty container is rendered. |
 
 ```javascript
 const option = {
@@ -142,7 +142,7 @@ const option = {
   locale: "hr", // Specifies the language used for translating error messages and labels. Currently, only English (en) and Croatian (hr) are supported. If another language is provided or the value is missing, the language will be determined by the browser's settings.
   layout: "stacked", // "default" | "stacked"
   showLabels: true,   // true | false (only applies when layout is "stacked")
-  hideStoredCardDetails: false, // true | false (supported only by the cardWithToken form and has no effect on the standard card payment form)
+  cvvOnly: false, // true | false (applies only to the cardWithToken form)
 };
 ```
 ##### Layout Examples
