@@ -129,7 +129,6 @@ const card = corvuspay.card(option, style, "corvuspay-card-element");
 
   | Option | Variable Type | Description                                                                                                                                                                                                                            |
     |-------------------|---------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-  | `showCvv` | Boolean       | Set to `true` if you want to show the CVV field.                                                                                                                                                                                       |
   | `hideCorvusPayLogo` | Boolean       | Set to `true` if you want to hide the CorvusPay logo.                                                                                                                                                                                  |
   | `locale` | String        | Set to `hr`, `en`, or `sr` for language of labels and error messages. Default locale is determined by the browser's settings.                                                                                                          |
   | `layout` | String        | Defines form layout. Possible values: `"default"` (inline layout) or `"stacked"` (vertical layout).                                                                                                                                    |
@@ -228,6 +227,13 @@ card.on("can-discounted-amount-be-used", (canDiscountedAmountBeUsed) =>
 card.on("card-info", (cardInfo) =>
     doOnCardInfo(cardInfo)
 );
+
+// This event is fired when diagnostic information is available from CorvusFrame.
+// It can be used for debugging, monitoring, or forwarding safe diagnostic data to your backend.
+card.on("diagnostics", (diagnostics) => 
+        handleDiagnostics(diagnostics)
+);
+
 ```
 
 - `ready`: Triggered when the CorvusFrame form is loaded and ready.
@@ -249,6 +255,17 @@ card.on("card-info", (cardInfo) =>
   - `canDiscountedAmountBeUsed`: Indicates whether discount can be applied for the specific card number. (Boolean value)
 - `card-info`: Triggered when card brand is detected or changed. This event includes the following properties:
   - `cardInfo`: String value containing card brand.
+- `diagnostics`: Triggered when CorvusFrame emits diagnostic information about the checkout flow. This event can be used for debugging and monitoring purposes. It may be fired for lifecycle events, backend communication steps, payment processing. This event includes the following properties:
+  - `source`: Source of the diagnostic event. Default value is `corvuspay-js-lib`.
+  - `level`: Diagnostic level, for example `INFO`, `WARN`, or `ERROR`.
+  - `event`: Name of the diagnostic event, for example `finishCardPayment`, `card-ready`, or `ready`.
+  - `message`: Human-readable diagnostic message.
+  - `errorCode`: Error code, when available.
+  - `errorMessage`: Technical error message, when available.
+  - `paymentId`: Payment ID related to the diagnostic event, when available.
+  - `publicKey`: Public key related to the diagnostic event, when available.
+  - `endpoint`: Backend endpoint related to the diagnostic event, when available.
+  - `timestamp`: Time when the diagnostic event was created.
 
 These events help you manage different stages and errors during the payment process.
 
