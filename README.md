@@ -341,6 +341,20 @@ After the payment process is complete, the doOnFinishCardPayment function is inv
 
 > **Note:** The `signature` parameter should be validated by the shop backend using the Store Secret Key.
 
+##### Error Codes
+
+The errorCode field in CardPaymentResult can contain one of the following values:
+
+| Error Code | Explanation                                                                                                                             |
+|------------|-----------------------------------------------------------------------------------------------------------------------------------------|
+| 1050       | Unexpected error occurred while communicating with the payment service.                                                                 |
+| 1826       | The payment request failed due to a network or transport error. The client could not successfully communicate with the payment service. |
+| 1827       | The payment service returned a response that could not be processed because it was invalid or in an unexpected format.                  |
+
+These codes are returned in CardPaymentResult.errorCode when status is nok.
+
+**Note:** For `1826` and `1827`, the payment outcome may be unknown from the client side. It is recommended to check the transaction status on the backend before retrying the payment or showing a final result to the customer.
+
 ##### Constants
 
 - `CardPaymentResult.PAYMENT_OK`: A constant with the value "ok", indicating transaction approval.
