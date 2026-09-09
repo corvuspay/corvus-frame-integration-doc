@@ -176,19 +176,22 @@ Labels are displayed above inputs for better clarity.
 
 - `style`: An object containing style options for the CorvusPay form.
 
-| Option            | Variable Type | Description                                      | Format                          |
-|------------------|--------------|--------------------------------------------------|----------------------------------|
-| `backgroundColor`| String       | Background color of the form.                    | Hexadecimal, e.g., "#ffffff"     |
-| `fontFamily`     | String       | Font family of the form.                         | -                                |
-| `fontSize`       | Numeric      | Font size of the form.                           | Numeric                          |
-| `fontColor`      | String       | Font color of the form.                          | Hexadecimal, e.g., "#000000"     |
-| `borderColor`    | String       | Border color of form fields and container.       | Hexadecimal, e.g., "#dedede"     |
+| Option             | Variable Type | Description                                | Format                          |
+|--------------------|---------------|--------------------------------------------|---------------------------------|
+| `backgroundColor`  | String        | Background color of the form.              | Hexadecimal, e.g., "#ffffff"    |
+| `fontFamily`       | String        | Font family of the form.                   | -                               |
+| `fontSize`         | Numeric       | Font size of the form.                     | Numeric                         |
+| `fontColor`        | String        | Font color of labels.                      | Hexadecimal, e.g., "#000000"    |
+| `inputFontColor`   | String        | Font color of input values.                | Hexadecimal, e.g., "#333333"    |
+| `borderColor`      | String        | Border color of form fields and container. | Hexadecimal, e.g., "#dedede"    |
+
 ```javascript
 const style = {
   backgroundColor: "#ffffff", // Background color of the form
   fontFamily: "Arial", // Font family of the form
   fontSize: 13, // Font size of the form
-  fontColor: "#000000", // Font color of the form
+  fontColor: "#000000", // Font color of labels
+  inputFontColor: "#333333", // Font color of input values
   borderColor: "#dedede", // Border color of the form fields and container
 };
 ```
