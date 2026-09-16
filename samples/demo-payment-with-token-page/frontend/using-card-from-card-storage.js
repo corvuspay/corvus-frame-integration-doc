@@ -102,6 +102,11 @@ const showPaymentWithTokenForm = (sessionToken) => {
      * fontSize: Font size of the form
      * fontColor: Font color of the form
      * borderColor: Border color of the form
+     * cvvCancelBtnBackgroundColor: Background color of the CVV modal Cancel button
+     * cvvCancelBtnFontColor: Text color of the CVV modal Cancel button
+     * cvvSuccessBtnBackgroundColor: Background color of the CVV modal Confirm/Success button
+     * cvvSuccessBtnFontColor: Text color of the CVV modal Confirm/Success button
+     * cvvInputBackgroundColor: Background color of the CVV input field in the CVV modal
      */
     const style = {
         // backgroundColor: "#ffffff", // Background color of the form
@@ -109,6 +114,11 @@ const showPaymentWithTokenForm = (sessionToken) => {
         // fontSize: 13, // Font size of the form
         // fontColor: "#000000", // Font color of the form
         // borderColor: "#000000", // Border color of the form
+        // cvvCancelBtnBackgroundColor: "#f5f5f5", // Background color of the CVV modal Cancel button
+        // cvvCancelBtnFontColor: "#333333", // Text color of the CVV modal Cancel button
+        // cvvSuccessBtnBackgroundColor: "#007bff", // Background color of the CVV modal Confirm/Success button
+        // cvvSuccessBtnFontColor: "#ffffff", // Text color of the CVV modal Confirm/Success button
+        // cvvInputBackgroundColor: "#ffffff", // Background color of the CVV input field in the CVV modal
     };
 
     const cardWithToken = corvuspay.cardWithToken(sessionToken, option, style, "corvuspay-with-token-card-element");
