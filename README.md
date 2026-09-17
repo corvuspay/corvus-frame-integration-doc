@@ -176,14 +176,19 @@ Labels are displayed above inputs for better clarity.
 
 - `style`: An object containing style options for the CorvusPay form.
 
-| Option             | Variable Type | Description                                | Format                          |
-|--------------------|---------------|--------------------------------------------|---------------------------------|
-| `backgroundColor`  | String        | Background color of the form.              | Hexadecimal, e.g., "#ffffff"    |
-| `fontFamily`       | String        | Font family of the form.                   | -                               |
-| `fontSize`         | Numeric       | Font size of the form.                     | Numeric                         |
-| `fontColor`        | String        | Font color of labels.                      | Hexadecimal, e.g., "#000000"    |
-| `inputFontColor`   | String        | Font color of input values.                | Hexadecimal, e.g., "#333333"    |
-| `borderColor`      | String        | Border color of form fields and container. | Hexadecimal, e.g., "#dedede"    |
+| Option             | Variable Type | Description                                               | Format                          |
+|--------------------|---------------|-----------------------------------------------------------|---------------------------------|
+| `backgroundColor`  | String        | Background color of the form.                             | Hexadecimal, e.g., "#ffffff"    |
+| `fontFamily`       | String        | Font family of the form.                                  | -                               |
+| `fontSize`         | Numeric       | Font size of the form.                                    | Numeric                         |
+| `fontColor`        | String        | Font color of labels.                                     | Hexadecimal, e.g., "#000000"    |
+| `inputFontColor`   | String        | Font color of input values.                               | Hexadecimal, e.g., "#333333"    |
+| `borderColor`      | String        | Border color of form fields and container.                | Hexadecimal, e.g., "#dedede"    |
+| `cvvCancelBtnBackgroundColor` | String | Background color of the CVV modal Cancel button.          | Hexadecimal, e.g., "#f5f5f5" |
+| `cvvCancelBtnFontColor` | String | Text color of the CVV modal Cancel button.                | Hexadecimal, e.g., "#333333" |
+| `cvvSuccessBtnBackgroundColor` | String | Background color of the CVV modal Confirm/Success button. | Hexadecimal, e.g., "#007bff" |
+| `cvvSuccessBtnFontColor` | String | Text color of the CVV modal Confirm/Success button.       | Hexadecimal, e.g., "#ffffff" |
+| `cvvInputBackgroundColor` | String | Background color of the CVV input field in the CVV modal. | Hexadecimal, e.g., "#ffffff" |
 
 ```javascript
 const style = {
@@ -193,6 +198,11 @@ const style = {
   fontColor: "#000000", // Font color of labels
   inputFontColor: "#333333", // Font color of input values
   borderColor: "#dedede", // Border color of the form fields and container
+  cvvCancelBtnBackgroundColor: "#f5f5f5", // Background color of the CVV modal Cancel button
+  cvvCancelBtnFontColor: "#333333", // Text color of the CVV modal Cancel button
+  cvvSuccessBtnBackgroundColor: "#007bff", // Background color of the CVV modal Confirm/Success button
+  cvvSuccessBtnFontColor: "#ffffff", // Text color of the CVV modal Confirm/Success button
+  cvvInputBackgroundColor: "#ffffff", // Background color of the CVV input field in the CVV modal
 };
 ```
 
@@ -829,11 +839,14 @@ following endpoint:
 | `currency`               | String    | Yes      | "EUR"          | Currency in ISO 4217 format                                                                                                                                                                                                                                                                               |
 | `amount`                 | String    | Yes      | "123.54"       | Amount to be charged in currency unit                                                                                                                                                                                                                                                                     |
 | `cart`                   | String    | Yes      | "2x Item"      | Shopping-cart contents description                                                                                                                                                                                                                                                                        |
+| `cardholder_country_code` | String    | Conditional | "HR"       | Two-letter ISO 3166-1 alpha-2 country code of the cardholder. Required if it was not provided when the card was originally saved.                                                                                                                                                                                                                                  |
 | `require_complete`       | Boolean   | Yes      | `true`         | If `true`, payment will be finished only when order completion is confirmed                                                                                                                                                                                                                               |
 | `number_of_installments` | String    | No       | 06             | The number of installments selected for the payment. Set this field only if the `installments-calculated` event returns a `minInstallments` value greater than 1, indicating that installment payments are available. The value should fall between the returned `minInstallments` and `maxInstallments`. |
 | `signature`              | String    | Yes      | _Calculated_   | HMAC-SHA256 signature. See [Calculate Signature](#calculate-signature)                                                                                                                                                                                                                                    |
 | `original_amount`        | String    | No       | "123.54"       | Amount before applied discount                                                                                                                                                                                                                                                                            |
 | `discounted_amount_used` | Boolean   | No       | `true`         | Indicates if discounted amount is used                                                                                                                                                                                                                                                                    |
+
+Note: cardholder_country_code is required for init-payment-with-token only if it was not included when the card was saved. If it is missing from both requests, the payment initialization will fail.
 
 ##### Response Body
 
