@@ -134,6 +134,7 @@ const card = corvuspay.card(option, style, "corvuspay-card-element");
   | `layout` | String        | Defines form layout. Possible values: `"default"` (inline layout) or `"stacked"` (vertical layout).                                                                                                                                    |
   | `showLabels` | Boolean       | Controls whether labels are displayed above inputs. Works only with `"stacked"` layout.                                                                                                                                                |
   |`cvvOnly` | Boolean | When set to true, the saved-card form hides the stored card information (masked card number and expiration date) and displays only the CVV input. If CVV entry is not required, an empty container is rendered. |
+-   | `show3DSInFullScreen` | Boolean | When set to `true`, the 3D Secure authentication page is displayed in full screen instead of in a centered modal window. Intended for mobile devices, especially when CorvusFrame runs inside a mobile app's WebView, where the default modal is too small to display the bank's authentication page properly. On desktop browsers, the default modal is recommended. Default: `false`. |
 
 ```javascript
 const option = {
@@ -142,6 +143,7 @@ const option = {
   layout: "stacked", // "default" | "stacked"
   showLabels: true,   // true | false (only applies when layout is "stacked")
   cvvOnly: false, // true | false (applies only to the cardWithToken form)
+  show3DSInFullScreen: false, // true | false (intended for mobile devices / WebView, shows 3D Secure authentication in full screen instead of a modal)
 };
 ```
 ##### Layout Examples
@@ -171,6 +173,14 @@ Compact vertical layout using placeholders instead of labels.
 Labels are displayed above inputs for better clarity.
 
 ![Stacked Layout With Labels](files/layout-stacked-labels.png)
+
+##### 3D Secure in full screen (`show3DSInFullScreen`)
+
+By default, when 3D Secure authentication is required, the bank's authentication page is shown in a modal window of a fixed size in the center of the screen. This works well in desktop browsers, but on mobile devices the modal often takes up only part of the screen, so the bank's page can be hard to read and use.
+
+When `show3DSInFullScreen` is set to `true`, the authentication page covers the whole screen instead, which gives the cardholder a clearer and more usable experience on a phone. The option is intended for mobile devices, primarily for mobile apps that load CorvusFrame in a WebView. For desktop browsers, the default modal is recommended.
+
+The option applies to both the standard card form (`corvuspay.card`) and the saved-card form (`corvuspay.cardWithToken`). It doesn't affect the CVV modal, which is always shown as a modal. After authentication finishes, the form returns to its original size and position.
 
 ##### Styling
 
