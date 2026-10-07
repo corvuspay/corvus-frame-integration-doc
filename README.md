@@ -15,6 +15,7 @@
     - [Post-Payment Handling with `doOnFinishCardPayment`](#post-payment-handling-with-doonfinishcardpayment)
     - [Error Handling](#error-handling)
     - [Card Storage](#card-storage)
+      - [About user_card_profiles_id](#about-user_card_profiles_id)
       - [Saving a card for later use](#saving-a-card-for-later-use)
       - [Using a saved card](#using-a-saved-card)
     - [Subscription](#subscription)
@@ -388,6 +389,14 @@ backend, and later uses both values to display CorvusFrame with the saved card d
 Card storage is separate from subscription. If the goal is to register a card for a recurring subscription payment, use the
 [Subscription](#subscription) chapter instead.
 
+#### About user_card_profiles_id
+
+user_card_profiles_id is the identifier of the cardholder's card profile in the merchant system: the profile under which all cards saved by that cardholder are grouped. One user_card_profiles_id can hold multiple saved cards, and each saved card has its own token_value.
+
+Use the same user_card_profiles_id every time the same cardholder saves another card.
+A specific saved card is identified by the pair user_card_profiles_id + token_value. Both are needed to fetch a session token.
+The value must stay stable. If it changes, cards saved under the previous value can no longer be used.
+
 #### Saving a card for later use
 
 To save a card, initialize and display the standard CorvusFrame card form with `corvuspay.card(...)`, exactly as in the
@@ -398,7 +407,7 @@ When the shop backend initializes this payment, it must send the additional card
 
 - `save_card: true`
 - `card_storage_type: "CARD_STORAGE"`
-- `user_card_profiles_id`: the customer identifier from the merchant system
+- `user_card_profiles_id`: the identifier of the cardholder's card profile in the merchant system, under which the cardholder's saved cards are grouped. See [About user_card_profiles_id](#about-user_card_profiles_id)
 
 After the initial payment is approved, the shop backend should call `/api/js/1.0/get-token` and store the returned
 `token_value` together with the same `user_card_profiles_id`. These values are needed when the customer later pays with
@@ -625,7 +634,7 @@ for this first transaction.
 |-------------------------|-----------|----------|----------------|------------------------------------------------------------------------------------------------------|
 | `save_card`             | Boolean   | Yes      | `true`         | Must be `true` when saving a card for card storage.                                                  |
 | `card_storage_type`     | String    | Yes      | "CARD_STORAGE" | Selects the card storage flow.                                                                       |
-| `user_card_profiles_id` | String    | Yes      | "SHOP_12346"   | Customer identifier from the merchant system. This value is later used to fetch the session token.   |
+| `user_card_profiles_id` | String    | Yes      | "SHOP_12346"   | Identifier of the cardholder's card profile in the merchant system. One profile can hold multiple saved cards. Use the same value each time the cardholder saves a new card, and together with token_value when fetching a session token.   |
 
 ##### Example of initializing card storage payment
 
@@ -773,13 +782,13 @@ following endpoint:
 
 ##### Request Body
 
-| Parameter               | Data Type | Required | Example                      | Description                                                         |
-|-------------------------| --------- | -------- |------------------------------|---------------------------------------------------------------------|
-| `version`               | String    | No       | `1.6`                        | API version. Should be 1.6                                          |
-| `store_id`              | String    | Yes      | `123`                        | Store Id                                                            |
-| `user_card_profiles_id` | String    | Yes      | `SHOP_12346`                 | User card profiles id used when initiating card storage transaction |
-| `token_value`           | String    | Yes      | `5vNzKHNeCvWvc3pSOWIBMe`     | Token value, acquired in the get_token call                         |
-| `signature`             | String    | Yes      | `4be5aef695c...8b2ad4de5c74` | HMAC-SHA256. See [Calculate Signature](#calculate-signature)        |
+| Parameter               | Data Type | Required | Example                      | Description                                                  |
+|-------------------------| --------- | -------- |------------------------------|--------------------------------------------------------------|
+| `version`               | String    | No       | `1.6`                        | API version. Should be 1.6                                   |
+| `store_id`              | String    | Yes      | `123`                        | Store Id                                                     |
+| `user_card_profiles_id` | String    | Yes      | `SHOP_12346`                 | The same user_card_profiles_id that was sent in init-payment when the card was saved.|
+| `token_value`           | String    | Yes      | `5vNzKHNeCvWvc3pSOWIBMe`     | Token value, acquired in the get_token call                  |
+| `signature`             | String    | Yes      | `4be5aef695c...8b2ad4de5c74` | HMAC-SHA256. See [Calculate Signature](#calculate-signature) |
 
 ##### Response Body
 
